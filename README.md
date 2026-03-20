@@ -8,20 +8,20 @@ This project is a web-based platform designed to help Principal Engineers and Ar
 
 Key Features
 
-Framework Comparison
+* Framework Comparison
 Compare React, Vue, Angular, and Svelte across performance, scalability, and ecosystem.
 
-Business Impact Analysis
+* Business Impact Analysis
 Evaluate ROI, cost optimization, time-to-market, and risk.
 
-Use Case Recommendations
+* Use Case Recommendations
 Get technology suggestions based on project type, team expertise, and scale.
 
-Data Visualization
+* Data Visualization
 Interactive graphs for performance benchmarks, trends, and cost-value analysis.
 
-Pros & Cons Insights
+* Pros & Cons Insights
 Clear trade-offs and real-world considerations for each framework.
 
-Stakeholder-Friendly Views
-Simplified summaries for business owners, POs, and non-technical stakeholders.
+* Stakeholder-Friendly Views
+Simplified summaries for business owners, POs, and non-technical stakeholders
