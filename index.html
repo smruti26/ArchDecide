@@ -1,0 +1,2905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArchDecide — Principal Architect Decision Hub</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232563c8'/%3E%3Cstop offset='1' stop-color='%237c6fcd'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M8 22 L16 8 L24 22 M11 18 L21 18' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='16' cy='24' r='1.8' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white: #ffffff;
+  --off-white: #f8f9fc;
+  --light-grey: #f1f3f8;
+  --mid-grey: #e2e6f0;
+  --steel: #9aa3b8;
+  --ink: #1a1f35;
+  --ink-soft: #3d4566;
+  --ocean: #2563c8;
+  --ocean-light: #3b82f6;
+  --ocean-pale: #dbeafe;
+  --lavender: #7c6fcd;
+  --lavender-light: #a78bfa;
+  --lavender-pale: #ede9fe;
+  --teal: #0d9488;
+  --teal-pale: #ccfbf1;
+  --amber: #d97706;
+  --amber-pale: #fef3c7;
+  --rose: #e11d48;
+  --rose-pale: #ffe4e6;
+  --green: #16a34a;
+  --green-pale: #dcfce7;
+  --shadow-sm: 0 1px 3px rgba(26,31,53,0.06), 0 1px 2px rgba(26,31,53,0.04);
+  --shadow-md: 0 4px 16px rgba(26,31,53,0.08), 0 2px 6px rgba(26,31,53,0.05);
+  --shadow-lg: 0 12px 40px rgba(26,31,53,0.12), 0 4px 12px rgba(26,31,53,0.06);
+  --shadow-glow-ocean: 0 0 20px rgba(37,99,200,0.15);
+  --shadow-glow-lavender: 0 0 20px rgba(124,111,205,0.15);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--off-white);
+  color: var(--ink);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--light-grey); }
+::-webkit-scrollbar-thumb { background: var(--mid-grey); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--steel); }
+
+/* ─── NAV ────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 clamp(1.5rem, 5vw, 3rem);
+  height: 68px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--mid-grey);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+nav.hero-nav {
+  background: rgba(40,22,100,0.55);
+  border-bottom-color: rgba(255,255,255,0.1);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+}
+nav.hero-nav .nav-brand { color: white; }
+nav.hero-nav .nav-links a { color: rgba(255,255,255,0.78); }
+nav.hero-nav .nav-links a:hover { background: rgba(255,255,255,0.1); color: white; }
+nav.hero-nav .nav-links a.active { background: rgba(255,255,255,0.15); color: white; }
+nav.hero-nav .nav-links a svg { opacity: 0.65; }
+nav.hero-nav .nav-links a:hover svg,
+nav.hero-nav .nav-links a.active svg { opacity: 1; }
+nav.hero-nav .btn-primary {
+  background: white;
+  color: var(--lavender);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+nav.hero-nav .hamburger span { background: white; }
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.35rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.nav-brand-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--ocean) 0%, var(--lavender) 100%);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(37,99,200,0.3);
+}
+.nav-brand-icon svg { width: 18px; height: 18px; fill: white; }
+.nav-links {
+  display: flex; align-items: center; gap: 0.15rem;
+  list-style: none;
+}
+.nav-links a {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 13px;
+  font-size: 0.845rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all 0.22s;
+  white-space: nowrap;
+}
+.nav-links a svg {
+  width: 14px; height: 14px;
+  flex-shrink: 0;
+  opacity: 0.55;
+  transition: opacity 0.22s, transform 0.22s;
+}
+.nav-links a:hover { background: var(--light-grey); color: var(--ocean); }
+.nav-links a:hover svg { opacity: 1; transform: scale(1.1); }
+.nav-links a.active { background: var(--ocean-pale); color: var(--ocean); }
+.nav-links a.active svg { opacity: 1; }
+.nav-cta {
+  display: flex; align-items: center; gap: 10px;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, var(--ocean) 0%, var(--lavender) 100%);
+  color: white;
+  border: none; border-radius: var(--radius-md);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem; font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 2px 10px rgba(37,99,200,0.25);
+  transition: all 0.25s;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(37,99,200,0.35); }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 20px;
+  background: white;
+  color: var(--ink);
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-md);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem; font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+.btn-secondary:hover { border-color: var(--ocean); color: var(--ocean); background: var(--ocean-pale); }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 6px; }
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; transition: all 0.3s; }
+
+/* ─── HERO ───────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(68px + 4rem) clamp(1.5rem, 6vw, 5rem) 5rem;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  background: linear-gradient(135deg, #3b2d8a 0%, #5b4fcf 25%, #7c6fcd 55%, #9b8ee0 80%, #c4b5f4 100%);
+}
+/* Layered atmospheric depth */
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 50%, rgba(37,99,200,0.3) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 80% at 85% 20%, rgba(196,181,244,0.22) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 50% at 50% 100%, rgba(30,15,80,0.35) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+.hero-inner {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.hero-bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+}
+.hero-bg-orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(139,92,246,0.45), transparent);
+  top: -160px; right: -80px; opacity: 0.6;
+}
+.hero-bg-orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(59,130,246,0.38), transparent);
+  bottom: -120px; left: -80px; opacity: 0.55;
+}
+.hero-bg-orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(196,181,244,0.35), transparent);
+  top: 30%; left: 35%; opacity: 0.4;
+}
+/* Subtle dotted watermark pattern */
+.hero-bg-grid {
+  position: absolute; inset: 0; z-index: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.18) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.55;
+}
+.hero-content { position: relative; z-index: 1; width: 100%; max-width: 720px; }
+
+/* Badge */
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px 6px 8px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 100px;
+  font-size: 0.8rem; font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 1.75rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.hero-badge-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74,222,128,0.25);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 3px rgba(74,222,128,0.25); }
+  50% { box-shadow: 0 0 0 7px rgba(74,222,128,0); }
+}
+
+/* Heading */
+.hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2.2rem, 4.5vw, 4.2rem);
+  line-height: 1.08;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 24px rgba(0,0,0,0.18);
+  letter-spacing: -0.01em;
+}
+.hero h1 em {
+  font-style: italic;
+  background: linear-gradient(90deg, #c4b5f4, #93c5fd);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Body text */
+.hero p {
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  color: rgba(255,255,255,0.75);
+  margin: 0 auto 2.5rem;
+  font-weight: 300;
+  line-height: 1.75;
+  max-width: 560px;
+}
+
+/* Actions */
+.hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3.5rem; justify-content: center; }
+
+/* Override btn-primary inside hero for white version */
+.hero .btn-primary {
+  background: white;
+  color: var(--lavender);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.hero .btn-primary:hover {
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 6px 28px rgba(0,0,0,0.3);
+  transform: translateY(-2px);
+}
+.hero .btn-secondary {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.92);
+  border-color: rgba(255,255,255,0.3);
+  backdrop-filter: blur(8px);
+}
+.hero .btn-secondary:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.5);
+  color: white;
+}
+
+/* Stats */
+.hero-stats { display: flex; gap: clamp(1rem, 2.5vw, 2rem); flex-wrap: wrap; justify-content: center; }
+.hero-stat-item {
+  padding: 0.75rem 1.25rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(8px);
+  min-width: 96px;
+  text-align: center;
+}
+.hero-stat-value {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.85rem;
+  color: #ffffff;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.hero-stat-label {
+  font-size: 0.72rem; color: rgba(255,255,255,0.6);
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+/* Hero Visual Panel (replaces 3D canvas) */
+/* Hero scroll indicator */
+.hero-scroll-hint {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: rgba(255,255,255,0.35);
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+  z-index: 2;
+  cursor: pointer; text-decoration: none;
+}
+/* Hero watermark SVG */
+.hero-watermark {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
+}
+.hero-scroll-hint svg { width: 16px; height: 16px; }
+
+/* ─── TABLE ENHANCEMENTS ─────────────────────── */
+.table-controls {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;
+}
+.table-search {
+  display: flex; align-items: center; gap: 8px;
+  background: white;
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  color: var(--ink);
+  width: 220px;
+  transition: all 0.2s;
+}
+.table-search:focus-within { border-color: var(--ocean); box-shadow: 0 0 0 3px var(--ocean-pale); }
+.table-search input { border: none; outline: none; background: transparent; font-family: inherit; font-size: inherit; color: inherit; width: 100%; }
+.table-filter-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
+.table-filter-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 14px;
+  background: white;
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-md);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.table-filter-btn.active { background: var(--ocean-pale); border-color: var(--ocean); color: var(--ocean); }
+.table-filter-btn:hover:not(.active) { background: var(--light-grey); }
+.table-legend {
+  display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.75rem; color: var(--steel);
+}
+.table-legend-item { display: flex; align-items: center; gap: 5px; }
+.table-legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+tbody tr.highlighted td { background: rgba(37,99,200,0.04); }
+tbody tr.hidden-row { display: none; }
+thead th.sortable { cursor: pointer; user-select: none; }
+thead th.sortable:hover { background: rgba(255,255,255,0.12); }
+thead th .sort-icon { margin-left: 4px; opacity: 0.5; font-size: 0.7rem; }
+thead th.sort-asc .sort-icon::after { content: ' ↑'; }
+thead th.sort-desc .sort-icon::after { content: ' ↓'; }
+.fw-col-react { border-top: 3px solid #61dafb !important; }
+.fw-col-vue { border-top: 3px solid #42b883 !important; }
+.fw-col-angular { border-top: 3px solid #dd0031 !important; }
+.fw-col-svelte { border-top: 3px solid #ff3e00 !important; }
+.table-row-highlight td:first-child { position: relative; }
+.table-row-highlight td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--lavender);
+}
+.no-results-row td {
+  text-align: center; padding: 2rem;
+  color: var(--steel); font-style: italic;
+}
+
+/* ─── SECTION BASE ───────────────────────────── */
+section {
+  padding: 6rem clamp(1.5rem, 8vw, 6rem);
+}
+.section-header { text-align: center; margin-bottom: 3.5rem; }
+.section-tag {
+  display: inline-block;
+  padding: 4px 14px;
+  background: var(--ocean-pale);
+  color: var(--ocean);
+  border-radius: 100px;
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.section-tag.lavender { background: var(--lavender-pale); color: var(--lavender); }
+.section-tag.teal { background: var(--teal-pale); color: var(--teal); }
+.section-tag.amber { background: var(--amber-pale); color: var(--amber); }
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  color: var(--ink);
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+.section-subtitle {
+  font-size: 1.05rem;
+  color: var(--steel);
+  max-width: 560px;
+  margin: 0 auto;
+  font-weight: 300;
+}
+
+/* ─── TABS ───────────────────────────────────── */
+.tab-bar {
+  display: flex; gap: 0.5rem; flex-wrap: wrap;
+  justify-content: center;
+  background: white;
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-xl);
+  padding: 6px;
+  width: fit-content;
+  margin: 0 auto 3rem;
+  box-shadow: var(--shadow-sm);
+}
+.tab-btn {
+  padding: 8px 22px;
+  border: none; border-radius: var(--radius-lg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem; font-weight: 500;
+  color: var(--ink-soft);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.25s;
+  white-space: nowrap;
+}
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--ocean) 0%, var(--lavender) 100%);
+  color: white;
+  box-shadow: 0 2px 12px rgba(37,99,200,0.3);
+}
+.tab-btn:hover:not(.active) { background: var(--light-grey); }
+
+/* ─── FRAMEWORK COMPARISON ──────────────────── */
+#comparison { background: white; }
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+.fw-card {
+  background: var(--off-white);
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  transition: all 0.3s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.fw-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-accent, var(--ocean));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.fw-card:hover { border-color: var(--ocean); box-shadow: var(--shadow-md); transform: translateY(-3px); }
+.fw-card:hover::before { opacity: 1; }
+.fw-card.react { --card-accent: #61dafb; }
+.fw-card.vue { --card-accent: #42b883; }
+.fw-card.angular { --card-accent: #dd0031; }
+.fw-card.svelte { --card-accent: #ff3e00; }
+.fw-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; }
+.fw-logo {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+.fw-card.react .fw-logo { background: linear-gradient(135deg, #e8f8fd, #b8eaf6); }
+.fw-card.vue .fw-logo { background: linear-gradient(135deg, #e9f7ef, #c3e6d5); }
+.fw-card.angular .fw-logo { background: linear-gradient(135deg, #fdeaea, #f5b8b8); }
+.fw-card.svelte .fw-logo { background: linear-gradient(135deg, #fff0eb, #fdc9b4); }
+.fw-name { font-family: 'DM Serif Display', serif; font-size: 1.25rem; color: var(--ink); }
+.fw-version { font-size: 0.75rem; color: var(--steel); font-weight: 500; }
+.fw-market-share {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 0.75rem; font-weight: 700;
+  margin-bottom: 1rem;
+}
+.fw-card.react .fw-market-share { background: var(--ocean-pale); color: var(--ocean); }
+.fw-card.vue .fw-market-share { background: var(--teal-pale); color: var(--teal); }
+.fw-card.angular .fw-market-share { background: var(--rose-pale); color: var(--rose); }
+.fw-card.svelte .fw-market-share { background: var(--amber-pale); color: var(--amber); }
+.fw-metrics { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.25rem; }
+.metric-row { display: flex; flex-direction: column; gap: 5px; }
+.metric-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.metric-bar {
+  height: 6px;
+  background: var(--light-grey);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.metric-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--ocean);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fw-card.react .metric-fill { background: linear-gradient(90deg, #61dafb, #3b82f6); }
+.fw-card.vue .metric-fill { background: linear-gradient(90deg, #42b883, #0d9488); }
+.fw-card.angular .metric-fill { background: linear-gradient(90deg, #dd0031, #9f1239); }
+.fw-card.svelte .metric-fill { background: linear-gradient(90deg, #ff3e00, #d97706); }
+.fw-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.fw-tag {
+  padding: 3px 10px;
+  background: var(--light-grey);
+  border-radius: 100px;
+  font-size: 0.72rem; font-weight: 600;
+  color: var(--ink-soft);
+}
+
+/* ─── DETAIL COMPARISON TABLE ───────────────── */
+.comparison-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--mid-grey);
+  box-shadow: var(--shadow-sm);
+  margin-top: 2rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 600px;
+}
+thead tr { background: var(--ink); }
+thead th {
+  padding: 14px 16px;
+  color: white;
+  font-weight: 600;
+  text-align: left;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+thead th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+thead th:last-child { border-radius: 0 var(--radius-sm) 0 0; }
+tbody tr { transition: background 0.2s; }
+tbody tr:nth-child(even) { background: var(--off-white); }
+tbody tr:hover { background: var(--ocean-pale); }
+tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--mid-grey);
+  color: var(--ink-soft);
+}
+tbody td:first-child { font-weight: 600; color: var(--ink); }
+.rating-stars { color: var(--amber); font-size: 0.85rem; }
+.badge-cell {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 0.72rem; font-weight: 700;
+}
+.badge-high { background: var(--green-pale); color: var(--green); }
+.badge-med { background: var(--amber-pale); color: var(--amber); }
+.badge-low { background: var(--rose-pale); color: var(--rose); }
+.badge-growing { background: var(--lavender-pale); color: var(--lavender); }
+
+/* ─── BUSINESS IMPACT ───────────────────────── */
+#business { background: var(--off-white); }
+.business-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.impact-card {
+  background: white;
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  transition: all 0.3s;
+}
+.impact-card:hover { border-color: var(--lavender); box-shadow: var(--shadow-glow-lavender), var(--shadow-md); transform: translateY(-2px); }
+.impact-icon {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+.impact-card:nth-child(1) .impact-icon { background: linear-gradient(135deg, var(--ocean-pale), #bfdbfe); }
+.impact-card:nth-child(2) .impact-icon { background: linear-gradient(135deg, var(--green-pale), #bbf7d0); }
+.impact-card:nth-child(3) .impact-icon { background: linear-gradient(135deg, var(--lavender-pale), #ddd6fe); }
+.impact-card:nth-child(4) .impact-icon { background: linear-gradient(135deg, var(--amber-pale), #fde68a); }
+.impact-card:nth-child(5) .impact-icon { background: linear-gradient(135deg, var(--teal-pale), #99f6e4); }
+.impact-card:nth-child(6) .impact-icon { background: linear-gradient(135deg, var(--rose-pale), #fecdd3); }
+.impact-title { font-family: 'DM Serif Display', serif; font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--ink); }
+.impact-desc { font-size: 0.875rem; color: var(--steel); line-height: 1.6; margin-bottom: 1.25rem; }
+.impact-data-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--light-grey);
+}
+.impact-data-label { font-size: 0.8rem; color: var(--ink-soft); }
+.impact-data-value { font-size: 0.875rem; font-weight: 700; color: var(--ocean); }
+
+/* ─── RECOMMENDATION ENGINE ──────────────────── */
+#recommendation { background: white; }
+.wizard-card {
+  background: var(--off-white);
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-xl);
+  padding: clamp(2rem, 5vw, 3rem);
+  max-width: 780px;
+  margin: 0 auto;
+}
+.wizard-step-indicator {
+  display: flex; align-items: center; gap: 0; margin-bottom: 2.5rem;
+}
+.wizard-step-dot {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700;
+  background: var(--light-grey);
+  color: var(--steel);
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+.wizard-step-dot.active { background: var(--ocean); color: white; box-shadow: 0 0 0 4px var(--ocean-pale); }
+.wizard-step-dot.done { background: var(--green); color: white; }
+.wizard-step-line { flex: 1; height: 2px; background: var(--mid-grey); margin: 0 6px; }
+.wizard-step-line.done { background: var(--green); }
+.wizard-question {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.4rem;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+.wizard-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 2rem; }
+.wizard-option {
+  padding: 14px 16px;
+  background: white;
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.25s;
+  display: flex; align-items: center; gap: 10px;
+}
+.wizard-option:hover { border-color: var(--ocean); background: var(--ocean-pale); }
+.wizard-option.selected { border-color: var(--ocean); background: var(--ocean-pale); box-shadow: 0 0 0 3px rgba(37,99,200,0.1); }
+.wizard-option-icon { font-size: 1.2rem; }
+.wizard-option-text { font-size: 0.875rem; font-weight: 600; color: var(--ink); }
+.wizard-option-sub { font-size: 0.75rem; color: var(--steel); }
+.wizard-nav { display: flex; justify-content: space-between; align-items: center; }
+.wizard-progress {
+  font-size: 0.8rem; color: var(--steel);
+}
+.result-card {
+  background: white;
+  border: 2px solid var(--ocean);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  display: none;
+}
+.result-card.show { display: block; animation: fadeInUp 0.5s ease; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.result-header { display: flex; align-items: center; gap: 14px; margin-bottom: 1.5rem; }
+.result-badge {
+  padding: 6px 16px;
+  background: linear-gradient(135deg, var(--ocean), var(--lavender));
+  color: white; border-radius: 100px;
+  font-size: 0.8rem; font-weight: 700;
+}
+.result-framework { font-family: 'DM Serif Display', serif; font-size: 1.8rem; color: var(--ink); }
+.result-reason { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.7; margin-bottom: 1.5rem; }
+.result-factors { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.result-factor {
+  padding: 6px 14px;
+  background: var(--light-grey);
+  border-radius: 100px;
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--ink-soft);
+  display: flex; align-items: center; gap: 5px;
+}
+.result-factor.positive { background: var(--green-pale); color: var(--green); }
+.result-factor.warning { background: var(--amber-pale); color: var(--amber); }
+
+/* ─── PERFORMANCE BENCHMARKS ─────────────────── */
+#benchmarks {
+  background: linear-gradient(180deg, #f0f4ff 0%, #f8f5ff 50%, #f0f4ff 100%);
+  position: relative; overflow: hidden;
+}
+#benchmarks::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 20% 50%, rgba(37,99,200,0.04) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(124,111,205,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.75rem;
+  position: relative; z-index: 1;
+}
+.chart-card {
+  background: white;
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.chart-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ocean), var(--lavender));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.chart-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.chart-card:hover::after { opacity: 1; }
+.chart-card-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+.chart-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.15rem;
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+}
+.chart-subtitle {
+  font-size: 0.78rem; color: var(--steel); margin-bottom: 1.75rem;
+  display: flex; align-items: center; gap: 6px;
+}
+.chart-subtitle::before { content: ''; display: block; width: 3px; height: 3px; border-radius: 50%; background: var(--steel); flex-shrink: 0; }
+/* Enhanced bar chart */
+.bar-chart { display: flex; flex-direction: column; gap: 14px; }
+.bar-row { display: flex; align-items: center; gap: 12px; }
+.bar-label {
+  width: 72px; font-size: 0.8rem; font-weight: 700;
+  color: var(--ink); flex-shrink: 0; text-align: right;
+}
+.bar-track {
+  flex: 1; height: 36px;
+  background: var(--light-grey);
+  border-radius: 8px; overflow: hidden; position: relative;
+}
+.bar-fill {
+  height: 100%; border-radius: 8px;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 12px;
+  font-size: 0.78rem; font-weight: 700; color: white;
+  transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+.bar-fill::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+  border-radius: 8px;
+}
+.bar-best-tag {
+  position: absolute; right: -4px; top: 50%; transform: translateY(-50%);
+  background: var(--green); color: white;
+  font-size: 0.62rem; font-weight: 800;
+  padding: 2px 6px; border-radius: 4px;
+  white-space: nowrap;
+}
+/* Donut chart improvements */
+.donut-wrap {
+  display: flex; align-items: center; gap: 2rem;
+  flex-wrap: wrap; justify-content: center;
+}
+.donut-svg-wrap { position: relative; flex-shrink: 0; }
+.donut-svg { display: block; }
+.donut-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.donut-center-year { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+.donut-center-sub { font-size: 0.65rem; color: var(--steel); font-weight: 500; }
+.donut-legend { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 130px; }
+.donut-legend-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  background: var(--off-white);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--mid-grey);
+  transition: background 0.2s;
+}
+.donut-legend-item:hover { background: var(--ocean-pale); }
+.donut-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.donut-legend-label { font-size: 0.82rem; color: var(--ink-soft); flex: 1; font-weight: 500; }
+.donut-legend-value { font-size: 0.88rem; font-weight: 800; color: var(--ink); }
+/* Adoption trend chart overhaul */
+.adoption-trend { display: flex; flex-direction: column; gap: 10px; }
+.trend-row { display: flex; align-items: center; gap: 10px; }
+.trend-year {
+  width: 36px; font-size: 0.75rem; color: var(--steel);
+  font-weight: 700; flex-shrink: 0;
+}
+.trend-bars { flex: 1; display: flex; gap: 3px; height: 28px; }
+.trend-bar {
+  height: 100%; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.68rem; font-weight: 700; color: white;
+  position: relative; overflow: hidden; transition: opacity 0.2s;
+}
+.trend-bar::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 50%;
+  background: rgba(255,255,255,0.12);
+}
+.trend-bar:hover { opacity: 0.85; }
+/* Chart legend bar */
+.chart-legend-row {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  margin-top: 1.25rem; padding-top: 1.25rem;
+  border-top: 1px solid var(--light-grey);
+}
+.chart-legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; font-weight: 600; color: var(--ink-soft);
+}
+.chart-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+/* Stats chips inside chart cards */
+.chart-stat-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.chart-stat-chip {
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 0.72rem; font-weight: 700;
+  display: flex; align-items: center; gap: 4px;
+}
+.chip-react { background: #e8f8fd; color: #0891b2; }
+.chip-vue { background: #e9f7ef; color: #059669; }
+.chip-angular { background: #fdeaea; color: #dc2626; }
+.chip-svelte { background: #fff0eb; color: #ea580c; }
+
+/* ─── PROS CONS ──────────────────────────────── */
+#proscons { background: white; }
+.proscons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.procon-card {
+  background: var(--off-white);
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: all 0.3s;
+}
+.procon-card:hover { box-shadow: var(--shadow-md); }
+.procon-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1.5px solid var(--mid-grey);
+}
+.procon-logo {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+.procon-name { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--ink); }
+.pros-section, .cons-section { margin-bottom: 1rem; }
+.pros-cons-title {
+  font-size: 0.72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+.pros-cons-title.pros { color: var(--green); }
+.pros-cons-title.cons { color: var(--rose); }
+.pros-cons-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.pros-cons-list li {
+  font-size: 0.82rem; color: var(--ink-soft);
+  display: flex; align-items: flex-start; gap: 6px;
+  line-height: 1.5;
+}
+.pros-cons-list li::before {
+  margin-top: 3px;
+  flex-shrink: 0;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 700;
+}
+.pros-cons-list.pros li::before { content: '✓'; background: var(--green-pale); color: var(--green); }
+.pros-cons-list.cons li::before { content: '✗'; background: var(--rose-pale); color: var(--rose); }
+
+/* ─── DECISION FRAMEWORK ─────────────────────── */
+#guidance { background: var(--off-white); }
+.decision-tree-wrap { max-width: 900px; margin: 0 auto; }
+.dt-node {
+  background: white;
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin: 0 auto;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+.dt-node.root {
+  background: linear-gradient(135deg, var(--ocean), var(--lavender));
+  border-color: transparent;
+  color: white;
+}
+.dt-node-label { font-size: 0.85rem; font-weight: 600; }
+.dt-node.root .dt-node-label { color: white; font-size: 0.95rem; }
+.dt-level { display: flex; gap: 1rem; justify-content: center; margin: 1rem 0; flex-wrap: wrap; }
+.dt-connector { text-align: center; margin: 0.25rem 0; }
+.dt-connector-line { width: 2px; height: 20px; background: var(--mid-grey); margin: 0 auto; }
+.dt-connector-label { font-size: 0.72rem; color: var(--steel); font-weight: 600; }
+.dt-result {
+  border: 2px solid;
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.1rem;
+  text-align: center;
+  min-width: 140px;
+}
+.dt-result.react-result { border-color: #61dafb; background: #e8f8fd; }
+.dt-result.vue-result { border-color: #42b883; background: #e9f7ef; }
+.dt-result.angular-result { border-color: #dd0031; background: #fdeaea; }
+.dt-result.svelte-result { border-color: #ff3e00; background: #fff0eb; }
+.dt-result-fw { font-weight: 700; font-size: 0.9rem; color: var(--ink); margin-bottom: 3px; }
+.dt-result-reason { font-size: 0.72rem; color: var(--steel); }
+.antipatterns-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+.antipattern-item {
+  background: white;
+  border-left: 3px solid var(--rose);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 1rem 1.25rem;
+}
+.antipattern-title { font-weight: 700; font-size: 0.875rem; color: var(--rose); margin-bottom: 4px; }
+.antipattern-desc { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; }
+
+/* ─── STAKEHOLDER SECTION ───────────────────── */
+#stakeholder { background: white; }
+.stakeholder-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.stakeholder-tab {
+  padding: 8px 18px;
+  background: var(--light-grey);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem; font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.stakeholder-tab.active { background: var(--lavender-pale); border-color: var(--lavender); color: var(--lavender); }
+.stakeholder-content { display: none; }
+.stakeholder-content.active { display: block; animation: fadeInUp 0.35s ease; }
+.exec-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.exec-summary-main {
+  background: var(--off-white);
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  grid-column: span 2;
+}
+.exec-kpi-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.5rem; }
+.exec-kpi {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  flex: 1; min-width: 160px;
+  border: 1.5px solid var(--mid-grey);
+  text-align: center;
+}
+.exec-kpi-value { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--ocean); }
+.exec-kpi-label { font-size: 0.78rem; color: var(--steel); font-weight: 500; }
+.exec-card {
+  background: var(--off-white);
+  border: 1.5px solid var(--mid-grey);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+.exec-card h3 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; margin-bottom: 0.75rem; }
+.exec-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.exec-card ul li { font-size: 0.85rem; color: var(--ink-soft); display: flex; gap: 8px; align-items: flex-start; }
+.exec-card ul li::before { content: '→'; color: var(--ocean); font-weight: 700; flex-shrink: 0; }
+
+/* ─── FOOTER ─────────────────────────────────── */
+footer {
+  background: linear-gradient(145deg, #5b4fcf 0%, #6d5fd4 40%, #7c6fcd 70%, #9b8ee0 100%);
+  color: rgba(255,255,255,0.8);
+  padding: 4rem clamp(1.5rem, 8vw, 6rem) 2.5rem;
+  position: relative; overflow: hidden;
+}
+footer::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 10% 80%, rgba(255,255,255,0.06) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 10%, rgba(255,255,255,0.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+footer::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+}
+.footer-inner {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+  position: relative; z-index: 1;
+}
+.footer-brand-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 0.875rem; }
+.footer-brand-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px);
+}
+.footer-brand-icon svg { width: 18px; height: 18px; fill: white; }
+.footer-brand { font-family: 'DM Serif Display', serif; font-size: 1.35rem; color: white; }
+.footer-tagline { font-size: 0.875rem; line-height: 1.7; max-width: 260px; color: rgba(255,255,255,0.72); margin-bottom: 1.5rem; }
+.footer-social { display: flex; gap: 10px; }
+.footer-social-btn {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: white; text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.25s;
+  backdrop-filter: blur(6px);
+}
+.footer-social-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); border-color: rgba(255,255,255,0.4); }
+.footer-col-title {
+  font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.12em; color: rgba(255,255,255,0.5);
+  margin-bottom: 1rem;
+}
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer-links a {
+  color: rgba(255,255,255,0.72); text-decoration: none;
+  font-size: 0.875rem; transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.footer-links a::before {
+  content: ''; width: 0; height: 1px;
+  background: rgba(255,255,255,0.6);
+  transition: width 0.25s;
+  display: block;
+}
+.footer-links a:hover { color: white; }
+.footer-links a:hover::before { width: 10px; }
+.footer-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+  margin-bottom: 1.5rem;
+  position: relative; z-index: 1;
+}
+/* Author credit row */
+.footer-author {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1.25rem;
+  position: relative; z-index: 1;
+}
+.footer-author-left {
+  display: flex; align-items: center; gap: 14px;
+}
+.footer-author-avatar {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.22);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.8);
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.05);
+}
+.footer-author-info {
+  display: flex; flex-direction: column; gap: 5px;
+}
+.footer-author-copy {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.4;
+}
+.footer-author-copy strong {
+  color: rgba(255,255,255,0.92);
+  font-weight: 700;
+}
+.footer-author-tags {
+  display: flex; align-items: center; gap: 7px;
+  flex-wrap: wrap;
+}
+.footer-author-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.72rem; font-weight: 600;
+  color: rgba(255,255,255,0.55);
+}
+.footer-author-tag svg {
+  flex-shrink: 0; opacity: 0.7;
+  color: rgba(255,255,255,0.6);
+}
+.footer-author-dot {
+  color: rgba(255,255,255,0.25);
+  font-size: 0.75rem;
+}
+.footer-tech { display: flex; gap: 8px; flex-wrap: wrap; }
+.footer-tech span {
+  padding: 4px 12px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 100px;
+  font-size: 0.72rem; font-weight: 700;
+  color: rgba(255,255,255,0.75);
+  transition: all 0.2s;
+}
+.footer-tech span:hover { background: rgba(255,255,255,0.2); color: white; }
+
+/* ─── MOBILE NAV ─────────────────────────────── */
+.mobile-menu {
+  position: fixed; top: 68px; left: 0; right: 0; z-index: 999;
+  background: white;
+  border-bottom: 1.5px solid var(--mid-grey);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 1rem 1.25rem 1.25rem;
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+.mobile-menu.open { transform: translateY(0); opacity: 1; }
+.mobile-menu-label {
+  font-size: 0.68rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--steel);
+  padding: 0 12px;
+  margin-bottom: 0.25rem;
+}
+.mobile-menu a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  font-size: 0.9rem; font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all 0.2s;
+}
+.mobile-menu a svg {
+  width: 16px; height: 16px; flex-shrink: 0;
+  color: var(--steel);
+  transition: color 0.2s;
+}
+.mobile-menu a:hover { background: var(--ocean-pale); color: var(--ocean); }
+.mobile-menu a:hover svg { color: var(--ocean); }
+.mobile-menu-divider { height: 1px; background: var(--mid-grey); margin: 0.5rem 0; }
+.mobile-menu-cta {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 16px;
+  background: linear-gradient(135deg, var(--ocean), var(--lavender));
+  color: white !important;
+  border-radius: var(--radius-md);
+  font-weight: 600 !important;
+  margin-top: 0.25rem;
+}
+.mobile-menu-cta svg { color: white !important; opacity: 0.9; }
+
+/* ─── RESPONSIVE ─────────────────────────────── */
+@media (max-width: 900px) {
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+  .footer-inner { grid-template-columns: 1fr 1fr; }
+  .wizard-options { grid-template-columns: 1fr; }
+  .exec-summary { grid-template-columns: 1fr; }
+  .exec-summary-main { grid-column: span 1; }
+}
+@media (max-width: 640px) {
+  section { padding: 4rem 1.25rem; }
+  .hero { padding: calc(68px + 2rem) 1.25rem 3rem; }
+  .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
+  .hero h1 { font-size: 2.2rem; }
+  .comparison-grid { grid-template-columns: 1fr; }
+  .table-controls { flex-direction: column; align-items: flex-start; }
+  .table-search { width: 100%; }
+}
+
+/* ─── ANIMATIONS ─────────────────────────────── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.2s; }
+.delay-3 { transition-delay: 0.3s; }
+.delay-4 { transition-delay: 0.4s; }
+
+/* ─── SCROLL TO TOP ──────────────────────────── */
+.scroll-top {
+  position: fixed; bottom: 2rem; right: 2rem; z-index: 500;
+  width: 44px; height: 44px;
+  background: var(--ink);
+  color: white;
+  border: none; border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s;
+  opacity: 0; visibility: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.scroll-top.visible { opacity: 1; visibility: visible; }
+.scroll-top:hover { background: var(--ocean); transform: translateY(-3px); }
+
+/* ─── TOOLTIP ─────────────────────────────────── */
+[data-tooltip] { position: relative; cursor: help; }
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%; transform: translateX(-50%);
+  background: var(--ink);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem; white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 100;
+}
+[data-tooltip]:hover::after { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-brand">
+    <div class="nav-brand-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    ArchDecide
+  </a>
+  <ul class="nav-links">
+    <li>
+      <a href="#comparison" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Compare
+      </a>
+    </li>
+    <li>
+      <a href="#business">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Business
+      </a>
+    </li>
+    <li>
+      <a href="#recommendation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Recommend
+      </a>
+    </li>
+    <li>
+      <a href="#benchmarks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Benchmarks
+      </a>
+    </li>
+    <li>
+      <a href="#proscons">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Pros &amp; Cons
+      </a>
+    </li>
+    <li>
+      <a href="#guidance">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Guidance
+      </a>
+    </li>
+    <li>
+      <a href="#stakeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Stakeholders
+      </a>
+    </li>
+  </ul>
+  <div class="nav-cta">
+    <a href="#recommendation" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Get Recommendation
+    </a>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-label">Navigation</div>
+  <a href="#comparison" onclick="toggleMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Framework Comparison
+  </a>
+  <a href="#business" onclick="toggleMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+    Business Impact
+  </a>
+  <a href="#benchmarks" onclick="toggleMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Benchmarks
+  </a>
+  <a href="#proscons" onclick="toggleMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Pros &amp; Cons
+  </a>
+  <a href="#guidance" onclick="toggleMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Decision Guidance
+  </a>
+  <a href="#stakeholder" onclick="toggleMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    Stakeholders
+  </a>
+  <div class="mobile-menu-divider"></div>
+  <a href="#recommendation" class="mobile-menu-cta" onclick="toggleMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    Get Recommendation
+  </a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-bg-orb hero-bg-orb-1"></div>
+  <div class="hero-bg-orb hero-bg-orb-2"></div>
+  <div class="hero-bg-orb hero-bg-orb-3"></div>
+
+  <!-- Subtle static watermark SVG — architectural topology -->
+  <svg class="hero-watermark" viewBox="0 0 900 500" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- Outer circles -->
+    <circle cx="450" cy="250" r="200" stroke="rgba(255,255,255,0.045)" stroke-width="1" stroke-dasharray="8 12"/>
+    <circle cx="450" cy="250" r="145" stroke="rgba(255,255,255,0.05)" stroke-width="0.8"/>
+    <circle cx="450" cy="250" r="90"  stroke="rgba(255,255,255,0.06)" stroke-width="0.8" stroke-dasharray="4 8"/>
+    <!-- Framework nodes -->
+    <circle cx="450" cy="105" r="9" fill="rgba(97,218,251,0.25)"  stroke="rgba(97,218,251,0.4)"  stroke-width="1"/>
+    <circle cx="605" cy="340" r="7" fill="rgba(66,184,131,0.22)"  stroke="rgba(66,184,131,0.38)"  stroke-width="1"/>
+    <circle cx="295" cy="340" r="7" fill="rgba(221,0,49,0.22)"    stroke="rgba(221,0,49,0.35)"    stroke-width="1"/>
+    <circle cx="640" cy="148" r="6" fill="rgba(255,110,64,0.22)"  stroke="rgba(255,110,64,0.35)"  stroke-width="1"/>
+    <!-- Center node -->
+    <circle cx="450" cy="250" r="14" fill="rgba(196,181,244,0.15)" stroke="rgba(196,181,244,0.35)" stroke-width="1"/>
+    <circle cx="450" cy="250" r="5"  fill="rgba(255,255,255,0.35)"/>
+    <!-- Connection spokes -->
+    <line x1="450" y1="114" x2="450" y2="236"  stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>
+    <line x1="597" y1="333" x2="460" y2="257"  stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>
+    <line x1="303" y1="333" x2="440" y2="257"  stroke="rgba(255,255,255,0.07)" stroke-width="0.8"/>
+    <line x1="633" y1="154" x2="461" y2="244"  stroke="rgba(255,255,255,0.06)" stroke-width="0.8" stroke-dasharray="3 5"/>
+    <!-- Arc connectors between nodes -->
+    <path d="M 450 105 Q 560 100 605 340" stroke="rgba(255,255,255,0.04)" stroke-width="0.8" fill="none"/>
+    <path d="M 295 340 Q 200 240 450 105" stroke="rgba(255,255,255,0.04)" stroke-width="0.8" fill="none"/>
+    <!-- Small accent dots scattered -->
+    <circle cx="580" cy="195" r="2.5" fill="rgba(196,181,244,0.3)"/>
+    <circle cx="325" cy="175" r="2"   fill="rgba(147,197,253,0.3)"/>
+    <circle cx="520" cy="360" r="2"   fill="rgba(110,231,183,0.3)"/>
+    <circle cx="370" cy="355" r="2.5" fill="rgba(253,230,138,0.3)"/>
+    <circle cx="670" cy="270" r="2"   fill="rgba(252,165,165,0.25)"/>
+    <circle cx="215" cy="270" r="2"   fill="rgba(147,197,253,0.25)"/>
+    <!-- Baseline trend line -->
+    <polyline points="50,420 160,400 280,375 400,352 500,360 640,330 780,310 900,295"
+      stroke="rgba(196,181,244,0.12)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <polyline points="50,440 160,428 280,415 400,405 500,410 640,395 780,380 900,372"
+      stroke="rgba(147,197,253,0.08)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </svg>
+
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Live Data · Updated 2025–2026
+      </div>
+      <h1>
+        Frontend Architecture<br>
+        <em>Decision Intelligence</em><br>
+        for Architects
+      </h1>
+      <p>
+        Empower your engineering decisions with real benchmark data, ROI analysis, and AI-guided recommendations. Compare React, Vue, Angular, and Svelte — and align technology choices with your business outcomes.
+      </p>
+      <div class="hero-actions">
+        <a href="#comparison" class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Explore Frameworks
+        </a>
+        <a href="#recommendation" class="btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6-10l6 3m0 10l5.447-2.724A1 1 0 0021 16.382V5.618a1 1 0 00-1.447-.894L15 7m0 10V7"/></svg>
+          Decision Wizard
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat-item">
+          <div class="hero-stat-value">4</div>
+          <div class="hero-stat-label">Frameworks</div>
+        </div>
+        <div class="hero-stat-item">
+          <div class="hero-stat-value">49K+</div>
+          <div class="hero-stat-label">Developers</div>
+        </div>
+        <div class="hero-stat-item">
+          <div class="hero-stat-value">12+</div>
+          <div class="hero-stat-label">Dimensions</div>
+        </div>
+        <div class="hero-stat-item">
+          <div class="hero-stat-value">2026</div>
+          <div class="hero-stat-label">Data Source</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll hint -->
+  <a href="#comparison" class="hero-scroll-hint">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    Scroll
+  </a>
+</section>
+
+<!-- FRAMEWORK COMPARISON -->
+<section id="comparison">
+  <div class="section-header fade-in">
+    <div class="section-tag">Framework Engine</div>
+    <h2 class="section-title">Compare Frontend Frameworks</h2>
+    <p class="section-subtitle">Data-backed comparison across 8 critical dimensions from the 2025 Stack Overflow Developer Survey (49,000+ respondents)</p>
+  </div>
+
+  <div class="comparison-grid">
+    <!-- React -->
+    <div class="fw-card react fade-in">
+      <div class="fw-card-header">
+        <div class="fw-logo">⚛️</div>
+        <div>
+          <div class="fw-name">React</div>
+          <div class="fw-version">v19 · Meta · 2013</div>
+        </div>
+      </div>
+      <div class="fw-market-share">📊 44.7% Market Share</div>
+      <div class="fw-metrics">
+        <div class="metric-row">
+          <div class="metric-label"><span>Performance</span><span>78/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:78%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Ecosystem</span><span>97/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:97%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Scalability</span><span>92/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:92%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Hiring Pool</span><span>96/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:96%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Learning Curve</span><span>62/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:62%"></div></div>
+        </div>
+      </div>
+      <div class="fw-tags">
+        <span class="fw-tag">Enterprise Ready</span>
+        <span class="fw-tag">Large Teams</span>
+        <span class="fw-tag">SPA / SSR</span>
+        <span class="fw-tag">React Native</span>
+      </div>
+    </div>
+
+    <!-- Vue -->
+    <div class="fw-card vue fade-in delay-1">
+      <div class="fw-card-header">
+        <div class="fw-logo">💚</div>
+        <div>
+          <div class="fw-name">Vue.js</div>
+          <div class="fw-version">v3.x · Evan You · 2014</div>
+        </div>
+      </div>
+      <div class="fw-market-share">📊 17.6% Market Share</div>
+      <div class="fw-metrics">
+        <div class="metric-row">
+          <div class="metric-label"><span>Performance</span><span>84/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:84%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Ecosystem</span><span>78/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:78%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Scalability</span><span>80/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:80%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Hiring Pool</span><span>70/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:70%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Learning Curve</span><span>90/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:90%"></div></div>
+        </div>
+      </div>
+      <div class="fw-tags">
+        <span class="fw-tag">Beginner Friendly</span>
+        <span class="fw-tag">Mid-size Teams</span>
+        <span class="fw-tag">Progressive</span>
+        <span class="fw-tag">Laravel Stack</span>
+      </div>
+    </div>
+
+    <!-- Angular -->
+    <div class="fw-card angular fade-in delay-2">
+      <div class="fw-card-header">
+        <div class="fw-logo">🅰️</div>
+        <div>
+          <div class="fw-name">Angular</div>
+          <div class="fw-version">v19 · Google · 2016</div>
+        </div>
+      </div>
+      <div class="fw-market-share">📊 18.2% Market Share</div>
+      <div class="fw-metrics">
+        <div class="metric-row">
+          <div class="metric-label"><span>Performance</span><span>75/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:75%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Ecosystem</span><span>86/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:86%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Scalability</span><span>93/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:93%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Hiring Pool</span><span>74/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:74%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Learning Curve</span><span>38/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:38%"></div></div>
+        </div>
+      </div>
+      <div class="fw-tags">
+        <span class="fw-tag">Enterprise</span>
+        <span class="fw-tag">TypeScript First</span>
+        <span class="fw-tag">Opinionated</span>
+        <span class="fw-tag">Full Framework</span>
+      </div>
+    </div>
+
+    <!-- Svelte -->
+    <div class="fw-card svelte fade-in delay-3">
+      <div class="fw-card-header">
+        <div class="fw-logo">🔥</div>
+        <div>
+          <div class="fw-name">Svelte</div>
+          <div class="fw-version">v5 · Rich Harris · 2016</div>
+        </div>
+      </div>
+      <div class="fw-market-share">📊 7.2% Market Share · Most Admired: 62.4%</div>
+      <div class="fw-metrics">
+        <div class="metric-row">
+          <div class="metric-label"><span>Performance</span><span>96/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:96%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Ecosystem</span><span>52/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:52%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Scalability</span><span>68/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:68%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Hiring Pool</span><span>28/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:28%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label"><span>Learning Curve</span><span>88/100</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:88%"></div></div>
+        </div>
+      </div>
+      <div class="fw-tags">
+        <span class="fw-tag">Compile-Time</span>
+        <span class="fw-tag">No Virtual DOM</span>
+        <span class="fw-tag">Tiny Bundles</span>
+        <span class="fw-tag">Performance-First</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Table -->
+  <div class="fade-in">
+    <div class="table-controls">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label class="table-search" for="tableSearch">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:#9aa3b8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="tableSearch" type="text" placeholder="Search dimensions..." oninput="filterTable(this.value)">
+        </label>
+        <div class="table-legend">
+          <span class="table-legend-item"><span class="table-legend-dot" style="background:var(--green)"></span>High</span>
+          <span class="table-legend-item"><span class="table-legend-dot" style="background:var(--amber)"></span>Medium</span>
+          <span class="table-legend-item"><span class="table-legend-dot" style="background:var(--rose)"></span>Low</span>
+          <span class="table-legend-item"><span class="table-legend-dot" style="background:var(--lavender)"></span>Growing</span>
+        </div>
+      </div>
+      <div class="table-filter-wrap">
+        <button class="table-filter-btn active" onclick="setFilter('all',this)">All Dimensions</button>
+        <button class="table-filter-btn" onclick="setFilter('performance',this)">⚡ Performance</button>
+        <button class="table-filter-btn" onclick="setFilter('ecosystem',this)">🔌 Ecosystem</button>
+        <button class="table-filter-btn" onclick="setFilter('enterprise',this)">🏢 Enterprise</button>
+      </div>
+    </div>
+
+    <div class="comparison-table-wrap">
+      <table id="comparisonTable">
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th class="fw-col-react">⚛️ React</th>
+            <th class="fw-col-vue">💚 Vue.js</th>
+            <th class="fw-col-angular">🅰️ Angular</th>
+            <th class="fw-col-svelte">🔥 Svelte</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-category="performance" data-tooltip="Production gzipped size for a minimal app">
+            <td>Bundle Size (Hello World)</td>
+            <td>~40 KB</td>
+            <td>~20 KB</td>
+            <td>~150 KB</td>
+            <td><strong style="color:var(--green)">~1.6 KB ✦</strong></td>
+          </tr>
+          <tr data-category="performance">
+            <td>Rendering Approach</td>
+            <td>Virtual DOM</td>
+            <td>Virtual DOM</td>
+            <td>Incremental DOM</td>
+            <td><strong>Compile-time (No VDOM)</strong></td>
+          </tr>
+          <tr data-category="ecosystem">
+            <td>TypeScript Support</td>
+            <td><span class="badge-cell badge-med">Good</span></td>
+            <td><span class="badge-cell badge-med">Good</span></td>
+            <td><span class="badge-cell badge-high">Excellent ✦</span></td>
+            <td><span class="badge-cell badge-med">Good</span></td>
+          </tr>
+          <tr data-category="enterprise">
+            <td>Enterprise Adoption</td>
+            <td><span class="badge-cell badge-high">68% Enterprises ✦</span></td>
+            <td><span class="badge-cell badge-med">45% YoY Growth</span></td>
+            <td><span class="badge-cell badge-high">Strong (Stable)</span></td>
+            <td><span class="badge-cell badge-growing">Growing Fast</span></td>
+          </tr>
+          <tr data-category="enterprise">
+            <td>Job Market (LinkedIn)</td>
+            <td><span class="badge-cell badge-high">110K+ Jobs ✦</span></td>
+            <td><span class="badge-cell badge-med">~15K Jobs</span></td>
+            <td><span class="badge-cell badge-med">~22K Jobs</span></td>
+            <td><span class="badge-cell badge-low">~900 Jobs</span></td>
+          </tr>
+          <tr data-category="ecosystem">
+            <td>Developer Satisfaction</td>
+            <td><span class="rating-stars">★★★★</span> 52.1%</td>
+            <td><span class="rating-stars">★★★★</span> 50.9%</td>
+            <td><span class="rating-stars">★★★</span> 44.7%</td>
+            <td><strong><span class="rating-stars">★★★★★</span> 62.4% ✦</strong></td>
+          </tr>
+          <tr data-category="ecosystem">
+            <td>SSR / Meta-Framework</td>
+            <td>Next.js (78% new apps)</td>
+            <td>Nuxt.js</td>
+            <td>Angular Universal</td>
+            <td>SvelteKit 2.0</td>
+          </tr>
+          <tr data-category="ecosystem">
+            <td>Mobile / Cross-Platform</td>
+            <td><span class="badge-cell badge-high">React Native ✦</span></td>
+            <td><span class="badge-cell badge-med">NativeScript</span></td>
+            <td><span class="badge-cell badge-med">NativeScript</span></td>
+            <td><span class="badge-cell badge-low">Limited</span></td>
+          </tr>
+          <tr data-category="ecosystem">
+            <td>State Management</td>
+            <td>Redux / Zustand / Jotai</td>
+            <td>Pinia / Vuex</td>
+            <td>NgRx (Built-in DI)</td>
+            <td>Built-in Stores</td>
+          </tr>
+          <tr data-category="performance">
+            <td>Learning Curve</td>
+            <td><span class="badge-cell badge-med">Moderate (Hooks)</span></td>
+            <td><span class="badge-cell badge-high">Gentle ✦</span></td>
+            <td><span class="badge-cell badge-low">Steep</span></td>
+            <td><span class="badge-cell badge-high">Gentle ✦</span></td>
+          </tr>
+          <tr data-category="enterprise">
+            <td>Micro-Frontend Support</td>
+            <td><span class="badge-cell badge-high">Excellent ✦</span></td>
+            <td><span class="badge-cell badge-med">Good</span></td>
+            <td><span class="badge-cell badge-high">Excellent ✦</span></td>
+            <td><span class="badge-cell badge-med">Moderate</span></td>
+          </tr>
+          <tr data-category="ecosystem">
+            <td>AI-Assisted Dev Support</td>
+            <td><span class="badge-cell badge-high">Excellent ✦</span></td>
+            <td><span class="badge-cell badge-med">Good</span></td>
+            <td><span class="badge-cell badge-med">Good</span></td>
+            <td><span class="badge-cell badge-growing">Improving</span></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="no-results-row" id="noResultsRow" style="display:none">
+            <td colspan="5">No matching dimensions found</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div style="margin-top:0.75rem;font-size:0.75rem;color:var(--steel);text-align:right">✦ = Best in class for this dimension</div>
+  </div>
+</section>
+
+<!-- BUSINESS IMPACT -->
+<section id="business">
+  <div class="section-header fade-in">
+    <div class="section-tag lavender">Business Intelligence</div>
+    <h2 class="section-title">Business Impact Analysis</h2>
+    <p class="section-subtitle">Understand the real-world cost, ROI, and risk profile of each technology choice for your organization</p>
+  </div>
+
+  <div class="business-grid">
+    <div class="impact-card fade-in">
+      <div class="impact-icon">💰</div>
+      <div class="impact-title">Development Cost</div>
+      <div class="impact-desc">Initial and ongoing development costs vary significantly by framework choice and team composition.</div>
+      <div class="impact-data-row"><span class="impact-data-label">React Team (5 devs, 6mo)</span><span class="impact-data-value">$280K–$450K</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Vue.js Team (5 devs, 6mo)</span><span class="impact-data-value">$230K–$380K</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Angular Enterprise Project</span><span class="impact-data-value">$350K–$600K</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Senior Frontend (US/hr)</span><span class="impact-data-value">$55–$120/hr</span></div>
+    </div>
+
+    <div class="impact-card fade-in delay-1">
+      <div class="impact-icon">📈</div>
+      <div class="impact-title">ROI & Productivity</div>
+      <div class="impact-desc">Framework selection directly impacts feature deployment cycles and developer productivity.</div>
+      <div class="impact-data-row"><span class="impact-data-label">React (POD Model Speed Gain)</span><span class="impact-data-value">+35% Faster</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Vue DX Benefit</span><span class="impact-data-value">Fastest Onboard</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Svelte Bundle Reduction</span><span class="impact-data-value">60–70% Smaller</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Angular Setup Overhead</span><span class="impact-data-value">+40% Initial</span></div>
+    </div>
+
+    <div class="impact-card fade-in delay-2">
+      <div class="impact-icon">⏱️</div>
+      <div class="impact-title">Time to Market</div>
+      <div class="impact-desc">Rapid delivery vs. long-term architecture — every week of delay costs business momentum.</div>
+      <div class="impact-data-row"><span class="impact-data-label">MVP with Vue/Svelte</span><span class="impact-data-value">~30% Faster</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Enterprise React Setup</span><span class="impact-data-value">6–12 wks</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Angular Enterprise Setup</span><span class="impact-data-value">10–16 wks</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">SaaS Dashboard (React)</span><span class="impact-data-value">$15K–$50K+</span></div>
+    </div>
+
+    <div class="impact-card fade-in delay-3">
+      <div class="impact-icon">⚠️</div>
+      <div class="impact-title">Risk Assessment</div>
+      <div class="impact-desc">Understand migration risk, talent dependency, and long-term maintenance considerations.</div>
+      <div class="impact-data-row"><span class="impact-data-label">Angular New Project Decline</span><span class="impact-data-value">−15% YoY</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">React Talent Ratio vs Svelte</span><span class="impact-data-value">122:1</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Post-Launch Bug Budget</span><span class="impact-data-value">+10–15%</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Svelte Enterprise Case Studies</span><span class="impact-data-value">Limited</span></div>
+    </div>
+
+    <div class="impact-card fade-in">
+      <div class="impact-icon">👥</div>
+      <div class="impact-title">Hiring & Talent</div>
+      <div class="impact-desc">Hiring availability directly impacts project costs, timelines, and long-term maintenance.</div>
+      <div class="impact-data-row"><span class="impact-data-label">React Job Listings (LinkedIn)</span><span class="impact-data-value">52% of Frontend</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Mid-Level Frontend (US)</span><span class="impact-data-value">$90K–$150K/yr</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Freelance Rate (North America)</span><span class="impact-data-value">$45–$70/hr</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Offshore Rate (Asia)</span><span class="impact-data-value">$15–$50/hr</span></div>
+    </div>
+
+    <div class="impact-card fade-in delay-1">
+      <div class="impact-icon">🔧</div>
+      <div class="impact-title">Maintainability</div>
+      <div class="impact-desc">Long-term maintainability depends on framework maturity, documentation, and community health.</div>
+      <div class="impact-data-row"><span class="impact-data-label">React LTS Confidence</span><span class="impact-data-value">Very High</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Vue Adoption YoY Enterprise</span><span class="impact-data-value">+45%</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Svelte GitHub Stars Growth</span><span class="impact-data-value">+150% (2yr)</span></div>
+      <div class="impact-data-row"><span class="impact-data-label">Next.js in New React Apps</span><span class="impact-data-value">78%</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- RECOMMENDATION ENGINE -->
+<section id="recommendation">
+  <div class="section-header fade-in">
+    <div class="section-tag teal">Smart Recommendation</div>
+    <h2 class="section-title">Use Case–Driven Decision Wizard</h2>
+    <p class="section-subtitle">Answer 4 quick questions and receive a data-backed framework recommendation tailored to your context</p>
+  </div>
+
+  <div class="wizard-card fade-in" id="wizard">
+    <!-- Step indicators -->
+    <div class="wizard-step-indicator">
+      <div class="wizard-step-dot active" id="dot-1">1</div>
+      <div class="wizard-step-line" id="line-1"></div>
+      <div class="wizard-step-dot" id="dot-2">2</div>
+      <div class="wizard-step-line" id="line-2"></div>
+      <div class="wizard-step-dot" id="dot-3">3</div>
+      <div class="wizard-step-line" id="line-3"></div>
+      <div class="wizard-step-dot" id="dot-4">4</div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="wizard-step" id="step-1">
+      <div class="wizard-question">What is your project scale?</div>
+      <div class="wizard-options">
+        <div class="wizard-option" onclick="selectOption(this, 1, 'startup')">
+          <span class="wizard-option-icon">🚀</span>
+          <div>
+            <div class="wizard-option-text">Startup / MVP</div>
+            <div class="wizard-option-sub">1–10 devs, fast iteration</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 1, 'midsize')">
+          <span class="wizard-option-icon">🏢</span>
+          <div>
+            <div class="wizard-option-text">Mid-size Product</div>
+            <div class="wizard-option-sub">10–50 devs, growing team</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 1, 'enterprise')">
+          <span class="wizard-option-icon">🏛️</span>
+          <div>
+            <div class="wizard-option-text">Enterprise</div>
+            <div class="wizard-option-sub">50+ devs, complex org</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 1, 'agency')">
+          <span class="wizard-option-icon">🎨</span>
+          <div>
+            <div class="wizard-option-text">Agency / Client Work</div>
+            <div class="wizard-option-sub">Multiple projects, varied</div>
+          </div>
+        </div>
+      </div>
+      <div class="wizard-nav">
+        <span class="wizard-progress">Step 1 of 4</span>
+        <button class="btn-primary" onclick="nextStep(2)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="wizard-step" id="step-2" style="display:none">
+      <div class="wizard-question">What is the primary app type?</div>
+      <div class="wizard-options">
+        <div class="wizard-option" onclick="selectOption(this, 2, 'spa')">
+          <span class="wizard-option-icon">📱</span>
+          <div>
+            <div class="wizard-option-text">Single Page App (SPA)</div>
+            <div class="wizard-option-sub">Dashboard, portal, tool</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 2, 'ssr')">
+          <span class="wizard-option-icon">🌐</span>
+          <div>
+            <div class="wizard-option-text">SSR / Content Site</div>
+            <div class="wizard-option-sub">SEO-critical, marketing</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 2, 'microfrontend')">
+          <span class="wizard-option-icon">🧩</span>
+          <div>
+            <div class="wizard-option-text">Micro-Frontend</div>
+            <div class="wizard-option-sub">Multiple teams, federated</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 2, 'ecommerce')">
+          <span class="wizard-option-icon">🛒</span>
+          <div>
+            <div class="wizard-option-text">E-commerce / Consumer</div>
+            <div class="wizard-option-sub">Performance-critical, mobile</div>
+          </div>
+        </div>
+      </div>
+      <div class="wizard-nav">
+        <button class="btn-secondary" onclick="prevStep(1)">← Back</button>
+        <button class="btn-primary" onclick="nextStep(3)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="wizard-step" id="step-3" style="display:none">
+      <div class="wizard-question">What's your team's expertise level?</div>
+      <div class="wizard-options">
+        <div class="wizard-option" onclick="selectOption(this, 3, 'beginner')">
+          <span class="wizard-option-icon">🌱</span>
+          <div>
+            <div class="wizard-option-text">Junior / Mixed</div>
+            <div class="wizard-option-sub">1–2 yrs experience avg.</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 3, 'mid')">
+          <span class="wizard-option-icon">🔧</span>
+          <div>
+            <div class="wizard-option-text">Mid-level Team</div>
+            <div class="wizard-option-sub">2–5 yrs, solid foundation</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 3, 'senior')">
+          <span class="wizard-option-icon">⭐</span>
+          <div>
+            <div class="wizard-option-text">Senior / Expert</div>
+            <div class="wizard-option-sub">5+ yrs, system design</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 3, 'react-existing')">
+          <span class="wizard-option-icon">⚛️</span>
+          <div>
+            <div class="wizard-option-text">Existing React Team</div>
+            <div class="wizard-option-sub">Already using React</div>
+          </div>
+        </div>
+      </div>
+      <div class="wizard-nav">
+        <button class="btn-secondary" onclick="prevStep(2)">← Back</button>
+        <button class="btn-primary" onclick="nextStep(4)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="wizard-step" id="step-4" style="display:none">
+      <div class="wizard-question">What's your top priority?</div>
+      <div class="wizard-options">
+        <div class="wizard-option" onclick="selectOption(this, 4, 'performance')">
+          <span class="wizard-option-icon">⚡</span>
+          <div>
+            <div class="wizard-option-text">Raw Performance</div>
+            <div class="wizard-option-sub">Bundle size, load speed</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 4, 'ecosystem')">
+          <span class="wizard-option-icon">🔌</span>
+          <div>
+            <div class="wizard-option-text">Ecosystem & Libraries</div>
+            <div class="wizard-option-sub">Third-party integrations</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 4, 'hiring')">
+          <span class="wizard-option-icon">👥</span>
+          <div>
+            <div class="wizard-option-text">Talent Availability</div>
+            <div class="wizard-option-sub">Easy hiring & onboarding</div>
+          </div>
+        </div>
+        <div class="wizard-option" onclick="selectOption(this, 4, 'dx')">
+          <span class="wizard-option-icon">💡</span>
+          <div>
+            <div class="wizard-option-text">Developer Experience</div>
+            <div class="wizard-option-sub">DX, productivity, happiness</div>
+          </div>
+        </div>
+      </div>
+      <div class="wizard-nav">
+        <button class="btn-secondary" onclick="prevStep(3)">← Back</button>
+        <button class="btn-primary" onclick="showResult()">Get Recommendation ✨</button>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card" id="result-card">
+      <div class="result-header">
+        <span class="result-badge">✅ Recommended</span>
+        <div class="result-framework" id="result-fw-name">React</div>
+      </div>
+      <div class="result-reason" id="result-reason">Loading recommendation...</div>
+      <div class="result-factors" id="result-factors"></div>
+      <br>
+      <button class="btn-secondary" onclick="resetWizard()" style="margin-top:1rem">
+        ↺ Start Over
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- PERFORMANCE BENCHMARKS -->
+<section id="benchmarks">
+  <div class="section-header fade-in">
+    <div class="section-tag">Benchmarks & Data</div>
+    <h2 class="section-title">Interactive Performance Dashboard</h2>
+    <p class="section-subtitle">Real data from JS Framework Benchmark, Stack Overflow Developer Survey 2025, and State of JS</p>
+  </div>
+
+  <div class="charts-grid">
+    <!-- Bundle Size -->
+    <div class="chart-card fade-in">
+      <div class="chart-card-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">📦</div>
+      <div class="chart-title">Bundle Size Comparison</div>
+      <div class="chart-subtitle">Production Hello World app · Smaller is better</div>
+      <div class="chart-stat-chips">
+        <span class="chart-stat-chip chip-svelte">🏆 Svelte wins</span>
+        <span class="chart-stat-chip chip-angular">⚠️ Angular heaviest</span>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-row">
+          <span class="bar-label">Angular</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:100%; background:linear-gradient(90deg,#dd0031,#9f1239)">150 KB</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">React</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:26.6%; background:linear-gradient(90deg,#61dafb,#3b82f6)">40 KB</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Vue.js</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:13.3%; background:linear-gradient(90deg,#42b883,#0d9488)">20 KB</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Svelte</span>
+          <div class="bar-track" style="position:relative">
+            <div class="bar-fill" style="width:1.1%; min-width:44px; background:linear-gradient(90deg,#ff6e40,#d97706)">1.6 KB</div>
+            <span class="bar-best-tag">Best</span>
+          </div>
+        </div>
+      </div>
+      <div class="chart-legend-row">
+        <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#61dafb"></div>React ~40 KB</div>
+        <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#42b883"></div>Vue ~20 KB</div>
+        <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#dd0031"></div>Angular ~150 KB</div>
+        <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#ff6e40"></div>Svelte ~1.6 KB</div>
+      </div>
+    </div>
+
+    <!-- Developer Adoption Donut -->
+    <div class="chart-card fade-in delay-1">
+      <div class="chart-card-icon" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe)">👥</div>
+      <div class="chart-title">Developer Adoption (2025)</div>
+      <div class="chart-subtitle">Stack Overflow Survey · 49,000+ respondents</div>
+      <div class="donut-wrap">
+        <div class="donut-svg-wrap">
+          <svg class="donut-svg" width="148" height="148" viewBox="0 0 148 148">
+            <circle cx="74" cy="74" r="52" fill="none" stroke="#f1f3f8" stroke-width="24"/>
+            <circle cx="74" cy="74" r="52" fill="none" stroke="#61dafb" stroke-width="24"
+              stroke-dasharray="146.2 180.6" stroke-dashoffset="0" transform="rotate(-90 74 74)"/>
+            <circle cx="74" cy="74" r="52" fill="none" stroke="#42b883" stroke-width="24"
+              stroke-dasharray="57.6 269.2" stroke-dashoffset="-146.2" transform="rotate(-90 74 74)"/>
+            <circle cx="74" cy="74" r="52" fill="none" stroke="#dd0031" stroke-width="24"
+              stroke-dasharray="59.5 267.3" stroke-dashoffset="-203.8" transform="rotate(-90 74 74)"/>
+            <circle cx="74" cy="74" r="52" fill="none" stroke="#ff6e40" stroke-width="24"
+              stroke-dasharray="23.6 303.2" stroke-dashoffset="-263.3" transform="rotate(-90 74 74)"/>
+          </svg>
+          <div class="donut-center">
+            <div class="donut-center-year">2025</div>
+            <div class="donut-center-sub">Survey</div>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" style="background:#61dafb"></div>
+            <span class="donut-legend-label">React</span>
+            <span class="donut-legend-value">44.7%</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" style="background:#dd0031"></div>
+            <span class="donut-legend-label">Angular</span>
+            <span class="donut-legend-value">18.2%</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" style="background:#42b883"></div>
+            <span class="donut-legend-label">Vue.js</span>
+            <span class="donut-legend-value">17.6%</span>
+          </div>
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" style="background:#ff6e40"></div>
+            <span class="donut-legend-label">Svelte</span>
+            <span class="donut-legend-value">7.2%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admiration Score -->
+    <div class="chart-card fade-in">
+      <div class="chart-card-icon" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">⭐</div>
+      <div class="chart-title">Developer Admiration Score</div>
+      <div class="chart-subtitle">% developers who admire &amp; want to keep using · 2025</div>
+      <div class="chart-stat-chips">
+        <span class="chart-stat-chip chip-svelte">🏆 Svelte most admired</span>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-row">
+          <span class="bar-label">Svelte</span>
+          <div class="bar-track" style="position:relative">
+            <div class="bar-fill" style="width:62.4%; background:linear-gradient(90deg,#ff6e40,#d97706)">62.4%</div>
+            <span class="bar-best-tag">Best</span>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">React</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:52.1%; background:linear-gradient(90deg,#61dafb,#3b82f6)">52.1%</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Vue.js</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:50.9%; background:linear-gradient(90deg,#42b883,#0d9488)">50.9%</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Angular</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:44.7%; background:linear-gradient(90deg,#dd0031,#9f1239)">44.7%</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-legend-row">
+        <div style="font-size:0.75rem;color:var(--steel)">Source: Stack Overflow Developer Survey 2025</div>
+      </div>
+    </div>
+
+    <!-- Adoption Trend -->
+    <div class="chart-card fade-in delay-1">
+      <div class="chart-card-icon" style="background:linear-gradient(135deg,#ccfbf1,#99f6e4)">📈</div>
+      <div class="chart-title">Adoption Trend (2021–2025)</div>
+      <div class="chart-subtitle">Stack Overflow usage % over time</div>
+      <div class="adoption-trend">
+        <div class="trend-row">
+          <span class="trend-year">2021</span>
+          <div class="trend-bars">
+            <div class="trend-bar" style="flex:40; background:#61dafb; color:#1a1f35; font-weight:800">⚛ 40%</div>
+            <div class="trend-bar" style="flex:19; background:#dd0031">A 19%</div>
+            <div class="trend-bar" style="flex:19; background:#42b883">V 19%</div>
+            <div class="trend-bar" style="flex:3; background:#ff6e40; font-size:0.55rem; min-width:14px">S</div>
+          </div>
+        </div>
+        <div class="trend-row">
+          <span class="trend-year">2022</span>
+          <div class="trend-bars">
+            <div class="trend-bar" style="flex:43; background:#61dafb; color:#1a1f35; font-weight:800">⚛ 43%</div>
+            <div class="trend-bar" style="flex:20; background:#dd0031">A 20%</div>
+            <div class="trend-bar" style="flex:19; background:#42b883">V 19%</div>
+            <div class="trend-bar" style="flex:5; background:#ff6e40; font-size:0.6rem">S</div>
+          </div>
+        </div>
+        <div class="trend-row">
+          <span class="trend-year">2023</span>
+          <div class="trend-bars">
+            <div class="trend-bar" style="flex:41; background:#61dafb; color:#1a1f35; font-weight:800">⚛ 41%</div>
+            <div class="trend-bar" style="flex:18; background:#dd0031">A 18%</div>
+            <div class="trend-bar" style="flex:16; background:#42b883">V 16%</div>
+            <div class="trend-bar" style="flex:7; background:#ff6e40; font-size:0.65rem">S 7%</div>
+          </div>
+        </div>
+        <div class="trend-row">
+          <span class="trend-year">2024</span>
+          <div class="trend-bars">
+            <div class="trend-bar" style="flex:40; background:#61dafb; color:#1a1f35; font-weight:800">⚛ 40%</div>
+            <div class="trend-bar" style="flex:17; background:#dd0031">A 17%</div>
+            <div class="trend-bar" style="flex:15; background:#42b883">V 15%</div>
+            <div class="trend-bar" style="flex:7; background:#ff6e40; font-size:0.65rem">S 7%</div>
+          </div>
+        </div>
+        <div class="trend-row">
+          <span class="trend-year">2025</span>
+          <div class="trend-bars">
+            <div class="trend-bar" style="flex:45; background:#61dafb; color:#1a1f35; font-weight:800">⚛ 45%</div>
+            <div class="trend-bar" style="flex:18; background:#dd0031">A 18%</div>
+            <div class="trend-bar" style="flex:18; background:#42b883">V 18%</div>
+            <div class="trend-bar" style="flex:7; background:#ff6e40; font-size:0.65rem">S 7%</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-legend-row">
+        <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#61dafb"></div>React</div>
+        <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#dd0031"></div>Angular</div>
+        <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#42b883"></div>Vue</div>
+        <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#ff6e40"></div>Svelte</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROS & CONS -->
+<section id="proscons">
+  <div class="section-header fade-in">
+    <div class="section-tag amber">Trade-off Analysis</div>
+    <h2 class="section-title">Pros, Cons & Real-World Trade-offs</h2>
+    <p class="section-subtitle">Candid strengths and weaknesses of each framework in production scenarios</p>
+  </div>
+
+  <div class="proscons-grid">
+    <!-- React -->
+    <div class="procon-card fade-in">
+      <div class="procon-header">
+        <div class="procon-logo" style="background:linear-gradient(135deg,#e8f8fd,#b8eaf6)">⚛️</div>
+        <div class="procon-name">React</div>
+      </div>
+      <div class="pros-section">
+        <div class="pros-cons-title pros">✦ Strengths</div>
+        <ul class="pros-cons-list pros">
+          <li>Largest ecosystem & library pool (React Native, Next.js)</li>
+          <li>Unmatched talent pool — 52% of frontend job listings</li>
+          <li>68% of enterprises already using React</li>
+          <li>Concurrent Mode & Server Components improve DX</li>
+          <li>AI tool support excellent (GitHub Copilot trained on React)</li>
+          <li>Stable upgrade path & Meta's long-term backing</li>
+        </ul>
+      </div>
+      <div class="cons-section">
+        <div class="pros-cons-title cons">✗ Weaknesses</div>
+        <ul class="pros-cons-list cons">
+          <li>Larger bundle (~40KB base) vs Svelte/Vue</li>
+          <li>Decision fatigue: too many state management options</li>
+          <li>Hooks learning curve trips up juniors</li>
+          <li>Virtual DOM overhead vs compile-time approaches</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Vue -->
+    <div class="procon-card fade-in delay-1">
+      <div class="procon-header">
+        <div class="procon-logo" style="background:linear-gradient(135deg,#e9f7ef,#c3e6d5)">💚</div>
+        <div class="procon-name">Vue.js</div>
+      </div>
+      <div class="pros-section">
+        <div class="pros-cons-title pros">✦ Strengths</div>
+        <ul class="pros-cons-list pros">
+          <li>Gentlest learning curve — fastest team onboarding</li>
+          <li>Composition API provides clean code organization</li>
+          <li>45% YoY enterprise growth in European markets</li>
+          <li>Progressive adoption — easy migration from jQuery</li>
+          <li>Integrated ecosystem (Router, Pinia, DevTools)</li>
+          <li>Best DX according to 2025 benchmark comparisons</li>
+        </ul>
+      </div>
+      <div class="cons-section">
+        <div class="pros-cons-title cons">✗ Weaknesses</div>
+        <ul class="pros-cons-list cons">
+          <li>Smaller talent pool than React (hiring harder)</li>
+          <li>Enterprise adoption lags behind React & Angular</li>
+          <li>Less suitable for React Native-like mobile targets</li>
+          <li>Fewer AI/Copilot training data references</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Angular -->
+    <div class="procon-card fade-in delay-2">
+      <div class="procon-header">
+        <div class="procon-logo" style="background:linear-gradient(135deg,#fdeaea,#f5b8b8)">🅰️</div>
+        <div class="procon-name">Angular</div>
+      </div>
+      <div class="pros-section">
+        <div class="pros-cons-title pros">✦ Strengths</div>
+        <ul class="pros-cons-list pros">
+          <li>Full opinionated framework — no architecture decisions</li>
+          <li>TypeScript-first by design, ideal for large teams</li>
+          <li>Dependency injection & modular architecture</li>
+          <li>Excellent for complex enterprise SPAs with multiple teams</li>
+          <li>Strong CLI tooling and testing infrastructure</li>
+        </ul>
+      </div>
+      <div class="cons-section">
+        <div class="pros-cons-title cons">✗ Weaknesses</div>
+        <ul class="pros-cons-list cons">
+          <li>Steep learning curve — largest boilerplate overhead</li>
+          <li>Largest bundle size (~150KB base)</li>
+          <li>New project starts declined 15% YoY (2025)</li>
+          <li>Rigid opinions can slow rapid prototyping</li>
+          <li>Slower adoption among newer startups & MVPs</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Svelte -->
+    <div class="procon-card fade-in delay-3">
+      <div class="procon-header">
+        <div class="procon-logo" style="background:linear-gradient(135deg,#fff0eb,#fdc9b4)">🔥</div>
+        <div class="procon-name">Svelte</div>
+      </div>
+      <div class="pros-section">
+        <div class="pros-cons-title pros">✦ Strengths</div>
+        <ul class="pros-cons-list pros">
+          <li>No virtual DOM — compiler generates optimal JS at build time</li>
+          <li>~1.6KB bundle (60–70% smaller than React/Vue)</li>
+          <li>Highest developer admiration: 62.4% (2025 survey)</li>
+          <li>Built-in animations, transitions, and state management</li>
+          <li>SvelteKit 2.0 provides excellent SSR & edge deployment</li>
+        </ul>
+      </div>
+      <div class="cons-section">
+        <div class="pros-cons-title cons">✗ Weaknesses</div>
+        <ul class="pros-cons-list cons">
+          <li>Tiny talent pool — 122:1 ratio of React to Svelte jobs</li>
+          <li>Limited enterprise case studies and patterns</li>
+          <li>Smaller third-party ecosystem — custom solutions needed</li>
+          <li>Community support is growing but not yet mature</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DECISION GUIDANCE -->
+<section id="guidance">
+  <div class="section-header fade-in">
+    <div class="section-tag lavender">Architecture Guidance</div>
+    <h2 class="section-title">Decision Framework & Anti-Patterns</h2>
+    <p class="section-subtitle">Structured guidance for Principal Architects — when to use what, and what to avoid</p>
+  </div>
+
+  <div class="decision-tree-wrap fade-in">
+    <div class="dt-node root"><div class="dt-node-label">🏛️ Start Here: What drives your decision?</div></div>
+    <div class="dt-connector"><div class="dt-connector-line"></div></div>
+    <div class="dt-level">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:140px">
+        <div class="dt-node"><div class="dt-node-label">🏢 Large Teams + Enterprise Scale</div></div>
+        <div class="dt-connector"><div class="dt-connector-line"></div></div>
+        <div class="dt-level" style="gap:6px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="dt-node" style="max-width:180px"><div class="dt-node-label" style="font-size:0.78rem">Need full framework + TypeScript</div></div>
+            <div class="dt-connector"><div class="dt-connector-line"></div><div class="dt-connector-label">→</div></div>
+            <div class="dt-result angular-result"><div class="dt-result-fw">🅰️ Angular</div><div class="dt-result-reason">Opinionated, scalable, TS-first</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="dt-node" style="max-width:180px"><div class="dt-node-label" style="font-size:0.78rem">Want ecosystem flexibility</div></div>
+            <div class="dt-connector"><div class="dt-connector-line"></div><div class="dt-connector-label">→</div></div>
+            <div class="dt-result react-result"><div class="dt-result-fw">⚛️ React + Next.js</div><div class="dt-result-reason">Widest ecosystem, safest hire</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:140px">
+        <div class="dt-node"><div class="dt-node-label">🚀 Startup / Fast Delivery</div></div>
+        <div class="dt-connector"><div class="dt-connector-line"></div></div>
+        <div class="dt-level" style="gap:6px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="dt-node" style="max-width:180px"><div class="dt-node-label" style="font-size:0.78rem">Junior team, fast onboarding</div></div>
+            <div class="dt-connector"><div class="dt-connector-line"></div></div>
+            <div class="dt-result vue-result"><div class="dt-result-fw">💚 Vue.js</div><div class="dt-result-reason">Gentlest curve, fast ramp-up</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="dt-node" style="max-width:180px"><div class="dt-node-label" style="font-size:0.78rem">Performance is critical</div></div>
+            <div class="dt-connector"><div class="dt-connector-line"></div></div>
+            <div class="dt-result svelte-result"><div class="dt-result-fw">🔥 Svelte / SvelteKit</div><div class="dt-result-reason">Smallest bundle, fastest load</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="antipatterns-list">
+    <div class="antipattern-item fade-in">
+      <div class="antipattern-title">⛔ Don't choose Angular for MVPs</div>
+      <div class="antipattern-desc">Angular's setup overhead adds 40% initial investment. Its opinionated structure slows rapid prototyping — use Vue or Svelte for MVPs instead.</div>
+    </div>
+    <div class="antipattern-item fade-in delay-1">
+      <div class="antipattern-title">⛔ Don't choose Svelte for large teams</div>
+      <div class="antipattern-desc">With a 122:1 React-to-Svelte job ratio, hiring becomes a critical bottleneck. Reserve Svelte for performance-critical, small-team projects.</div>
+    </div>
+    <div class="antipattern-item fade-in delay-2">
+      <div class="antipattern-title">⛔ Don't ignore bundle size for mobile</div>
+      <div class="antipattern-desc">47% of users abandon sites taking over 3 seconds. For mobile-first apps, every KB matters — Angular's 150KB base is a real risk on slow connections.</div>
+    </div>
+    <div class="antipattern-item fade-in delay-3">
+      <div class="antipattern-title">⛔ Don't switch frameworks mid-project</div>
+      <div class="antipattern-desc">Framework migrations can consume 30–50% of project budget and timeline. Commit early and plan architecture patterns before your first sprint.</div>
+    </div>
+    <div class="antipattern-item fade-in">
+      <div class="antipattern-title">⛔ Don't confuse popularity with fit</div>
+      <div class="antipattern-desc">React's dominance doesn't mean it's always optimal. Vue is more productive for small teams; Svelte is technically superior for performance. Match to your specific context.</div>
+    </div>
+    <div class="antipattern-item fade-in delay-1">
+      <div class="antipattern-title">⛔ Don't skip the hiring plan</div>
+      <div class="antipattern-desc">Choosing a framework without a talent strategy is an architectural risk. React offers the safest long-term hiring pool with 110K+ active LinkedIn listings.</div>
+    </div>
+  </div>
+</section>
+
+<!-- STAKEHOLDER COMMUNICATION -->
+<section id="stakeholder">
+  <div class="section-header fade-in">
+    <div class="section-tag teal">Stakeholder Layer</div>
+    <h2 class="section-title">Communicate Decisions to Every Audience</h2>
+    <p class="section-subtitle">Translate technical choices into business language your executives, POs, and engineers can act on</p>
+  </div>
+
+  <div class="fade-in">
+    <div class="stakeholder-tabs">
+      <button class="stakeholder-tab active" onclick="showStakeholder('executive')">👔 C-Suite / Executive</button>
+      <button class="stakeholder-tab" onclick="showStakeholder('po')">📋 Product Owner</button>
+      <button class="stakeholder-tab" onclick="showStakeholder('architect')">🏛️ Principal Architect</button>
+      <button class="stakeholder-tab" onclick="showStakeholder('engineer')">👩‍💻 Engineering Team</button>
+    </div>
+
+    <!-- Executive View -->
+    <div class="stakeholder-content active" id="st-executive">
+      <div class="exec-summary">
+        <div class="exec-summary-main">
+          <div class="section-tag" style="margin-bottom:1rem">Executive Summary · React 19 Recommendation</div>
+          <h3 style="font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:0.75rem">Choosing React for Your Enterprise Platform</h3>
+          <p style="color:var(--ink-soft);font-size:0.9rem;line-height:1.7;max-width:680px">
+            We recommend React as the primary frontend framework for your platform. React commands 44.7% of the market and is used by 68% of enterprise organizations. It provides the largest developer talent pool — critical for scaling your engineering team — and the most mature ecosystem for building complex, scalable products. With Meta's long-term backing and Next.js serving 78% of new React projects, your investment is protected and future-proof.
+          </p>
+          <div class="exec-kpi-row">
+            <div class="exec-kpi"><div class="exec-kpi-value">44.7%</div><div class="exec-kpi-label">Market Adoption</div></div>
+            <div class="exec-kpi"><div class="exec-kpi-value">110K+</div><div class="exec-kpi-label">LinkedIn Job Listings</div></div>
+            <div class="exec-kpi"><div class="exec-kpi-value">68%</div><div class="exec-kpi-label">Enterprise Usage Rate</div></div>
+            <div class="exec-kpi"><div class="exec-kpi-value">+35%</div><div class="exec-kpi-label">Faster Feature Deployment</div></div>
+          </div>
+        </div>
+        <div class="exec-card">
+          <h3>Strategic Benefits</h3>
+          <ul>
+            <li>Reduces hiring risk with the largest talent pool</li>
+            <li>Enables cross-platform (web + mobile) with React Native</li>
+            <li>Lower long-term maintenance cost vs Angular</li>
+            <li>Proven at scale: Meta, Netflix, Airbnb, Uber</li>
+            <li>Strong AI-augmented dev tool support</li>
+          </ul>
+        </div>
+        <div class="exec-card">
+          <h3>Investment Guidance</h3>
+          <ul>
+            <li>MVP SaaS Dashboard: $15K–$50K</li>
+            <li>Enterprise Platform (5 devs, 6 mo): $280K–$450K</li>
+            <li>Mid-Level React Dev (US): $90K–$150K/year</li>
+            <li>Post-launch maintenance budget: +10–15%</li>
+            <li>Recommend dedicated in-house team for long-term</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Owner View -->
+    <div class="stakeholder-content" id="st-po">
+      <div class="exec-summary">
+        <div class="exec-summary-main">
+          <div class="section-tag lavender" style="margin-bottom:1rem">Product Owner Perspective</div>
+          <h3 style="font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:0.75rem">What This Means for Your Roadmap</h3>
+          <p style="color:var(--ink-soft);font-size:0.9rem;line-height:1.7;max-width:680px">
+            Framework choice directly impacts how fast features reach your users. React's large ecosystem means your team can use pre-built components and tools instead of building from scratch — reducing sprint time by 20–35%. Vue.js offers the fastest onboarding for new developers, meaning less ramp-up time when you expand the team. For a performance-critical consumer app, Svelte can reduce page load times dramatically, directly improving conversion rates.
+          </p>
+          <div class="exec-kpi-row">
+            <div class="exec-kpi"><div class="exec-kpi-value">~30%</div><div class="exec-kpi-label">Faster MVP with Vue/Svelte</div></div>
+            <div class="exec-kpi"><div class="exec-kpi-value">6–12 wks</div><div class="exec-kpi-label">React Enterprise Setup</div></div>
+            <div class="exec-kpi"><div class="exec-kpi-value">47%</div><div class="exec-kpi-label">Users Leave After 3s Load</div></div>
+            <div class="exec-kpi"><div class="exec-kpi-value">+45%</div><div class="exec-kpi-label">Vue Enterprise Growth YoY</div></div>
+          </div>
+        </div>
+        <div class="exec-card">
+          <h3>Feature Velocity by Framework</h3>
+          <ul>
+            <li>React: Best for complex feature builds & integrations</li>
+            <li>Vue: Fastest sprint delivery for mid-size products</li>
+            <li>Angular: Best for scheduled, structured release cadence</li>
+            <li>Svelte: Fastest UI rendering, fewest performance bugs</li>
+          </ul>
+        </div>
+        <div class="exec-card">
+          <h3>User Experience Impact</h3>
+          <ul>
+            <li>Svelte apps: 60–70% smaller bundles = faster load</li>
+            <li>React + Next.js: Excellent SEO + Core Web Vitals</li>
+            <li>Angular: Consistent, structured UI patterns</li>
+            <li>Vue: Smooth transitions, excellent component DX</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Architect View -->
+    <div class="stakeholder-content" id="st-architect">
+      <div class="exec-summary">
+        <div class="exec-summary-main">
+          <div class="section-tag" style="margin-bottom:1rem">Principal Architect Assessment</div>
+          <h3 style="font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:0.75rem">Architecture Decision Record (ADR)</h3>
+          <p style="color:var(--ink-soft);font-size:0.9rem;line-height:1.7;max-width:680px">
+            <strong>Context:</strong> Selecting primary frontend framework for a multi-team, scalable enterprise product. <strong>Considered:</strong> React 19, Vue 3, Angular 19, Svelte 5. <strong>Decision:</strong> React 19 with Next.js App Router, adopting Module Federation for micro-frontend isolation. TypeScript enforced project-wide. State managed via Zustand (lightweight) or TanStack Query for server state. Design system implemented as independent Storybook component library. <strong>Consequences:</strong> Largest hiring pool, best AI tooling support, mature patterns for micro-frontend architecture.
+          </p>
+        </div>
+        <div class="exec-card">
+          <h3>Architecture Patterns Recommended</h3>
+          <ul>
+            <li>Module Federation (Webpack 5) for micro-frontends</li>
+            <li>Atomic Design for design system structure</li>
+            <li>Feature-sliced design for large codebases</li>
+            <li>Island Architecture for SSR performance</li>
+            <li>Monorepo (Turborepo/Nx) for multi-package management</li>
+          </ul>
+        </div>
+        <div class="exec-card">
+          <h3>Technology Constraints</h3>
+          <ul>
+            <li>Bundle budget: &lt;200KB initial, &lt;50KB per route chunk</li>
+            <li>Performance: Core Web Vitals LCP &lt;2.5s target</li>
+            <li>TypeScript strict mode enabled from day 1</li>
+            <li>Testing: Vitest unit + Playwright E2E mandatory</li>
+            <li>Accessibility: WCAG 2.1 AA compliance required</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Engineer View -->
+    <div class="stakeholder-content" id="st-engineer">
+      <div class="exec-summary">
+        <div class="exec-summary-main">
+          <div class="section-tag teal" style="margin-bottom:1rem">Engineering Team Briefing</div>
+          <h3 style="font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:0.75rem">Framework Selection & Technical Rationale</h3>
+          <p style="color:var(--ink-soft);font-size:0.9rem;line-height:1.7;max-width:680px">
+            We've selected <strong>React 19 + Next.js 15</strong> as our primary stack. React's Concurrent Mode and Server Components enable better data streaming and TTI. The App Router pattern improves code colocation. For performance-critical micro-apps within the platform, we may use Svelte (SvelteKit) as an isolated module — Svelte's 1.6KB baseline vs React's 40KB makes it ideal for widget-like modules. State management defaults to Zustand (simple) escalating to TanStack Query for async. Avoid Redux unless absolutely needed — the boilerplate debt outweighs benefits at our scale.
+          </p>
+        </div>
+        <div class="exec-card">
+          <h3>Tech Stack Decisions</h3>
+          <ul>
+            <li>Framework: React 19 + Next.js 15 (App Router)</li>
+            <li>TypeScript: Strict mode, no implicit any</li>
+            <li>Styling: Tailwind CSS + CSS Modules for components</li>
+            <li>Testing: Vitest + React Testing Library + Playwright</li>
+            <li>Bundler: Vite (dev) / Next.js built-in (prod)</li>
+          </ul>
+        </div>
+        <div class="exec-card">
+          <h3>Performance Budgets</h3>
+          <ul>
+            <li>Initial bundle: &lt;200KB gzipped</li>
+            <li>LCP: &lt;2.5s on 4G mobile</li>
+            <li>CLS: &lt;0.1 on all pages</li>
+            <li>FID/INP: &lt;100ms interaction latency</li>
+            <li>Lighthouse score target: 90+ across all metrics</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand-wrap">
+        <div class="footer-brand-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="footer-brand">ArchDecide</div>
+      </div>
+      <div class="footer-tagline">The Principal Architect's intelligence platform for data-driven frontend technology decisions. Built for engineers, aligned with business.</div>
+      <div class="footer-social">
+        <a href="#" class="footer-social-btn" title="GitHub" aria-label="GitHub">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        </a>
+        <a href="#" class="footer-social-btn" title="LinkedIn" aria-label="LinkedIn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="#" class="footer-social-btn" title="Twitter / X" aria-label="Twitter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.741l7.73-8.835L1.254 2.25H8.08l4.261 5.635L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a href="#" class="footer-social-btn" title="RSS Feed" aria-label="RSS">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Platform</div>
+      <ul class="footer-links">
+        <li><a href="#comparison">Framework Engine</a></li>
+        <li><a href="#benchmarks">Benchmarks</a></li>
+        <li><a href="#recommendation">Decision Wizard</a></li>
+        <li><a href="#business">Business Impact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Guidance</div>
+      <ul class="footer-links">
+        <li><a href="#proscons">Pros & Cons</a></li>
+        <li><a href="#guidance">Anti-Patterns</a></li>
+        <li><a href="#guidance">Decision Trees</a></li>
+        <li><a href="#stakeholder">Stakeholder Layer</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Data Sources</div>
+      <ul class="footer-links">
+        <li><a href="#">Stack Overflow 2025</a></li>
+        <li><a href="#">State of JS 2025</a></li>
+        <li><a href="#">JS Framework Benchmark</a></li>
+        <li><a href="#">GitHub Octoverse</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-divider"></div>
+
+  <!-- Author Credit -->
+  <div class="footer-author">
+    <div class="footer-author-left">
+      <div class="footer-author-avatar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div class="footer-author-info">
+        <div class="footer-author-copy">© All copyright reserved by <strong>Smruti Ranjan Behera</strong></div>
+        <div class="footer-author-tags">
+          <span class="footer-author-tag">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Principal Enterprise Architect – UI/UX
+          </span>
+          <span class="footer-author-dot">·</span>
+          <span class="footer-author-tag">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            Enterprise Frontend Platforms
+          </span>
+          <span class="footer-author-dot">·</span>
+          <span class="footer-author-tag">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            React Ecosystem
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-tech">
+      <span>React 19</span><span>Vue 3</span><span>Angular 19</span><span>Svelte 5</span><span>Next.js 15</span>
+    </div>
+  </div>
+</footer>
+
+<!-- SCROLL TOP -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// ─── NAV HERO MODE (transparent over hero) ──────
+const navEl = document.querySelector('nav');
+function updateNavMode() {
+  const heroH = document.getElementById('home')?.offsetHeight || 0;
+  if (window.scrollY < heroH - 80) {
+    navEl.classList.add('hero-nav');
+  } else {
+    navEl.classList.remove('hero-nav');
+  }
+}
+updateNavMode();
+window.addEventListener('scroll', updateNavMode, { passive: true });
+
+// ─── TABLE SEARCH & FILTER ─────────────────────
+let activeFilter = 'all';
+
+function filterTable(query) {
+  const rows = document.querySelectorAll('#comparisonTable tbody tr:not(.no-results-row)');
+  const q = query.toLowerCase().trim();
+  let visible = 0;
+  rows.forEach(row => {
+    const dim = row.querySelector('td')?.textContent.toLowerCase() || '';
+    const cat = row.dataset.category || '';
+    const matchSearch = !q || dim.includes(q);
+    const matchFilter = activeFilter === 'all' || cat === activeFilter;
+    if (matchSearch && matchFilter) { row.style.display = ''; visible++; }
+    else row.style.display = 'none';
+  });
+  document.getElementById('noResultsRow').style.display = visible === 0 ? '' : 'none';
+}
+
+function setFilter(cat, btn) {
+  activeFilter = cat;
+  document.querySelectorAll('.table-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterTable(document.getElementById('tableSearch')?.value || '');
+}
+
+// ─── MOBILE MENU ─────────────────────────────────
+function toggleMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const ham = document.querySelector('.hamburger');
+  menu.classList.toggle('open');
+  ham.classList.toggle('active');
+}
+
+// ─── SCROLL TOP ────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTop');
+  if (window.scrollY > 400) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+});
+
+// ─── FADE IN OBSERVER ─────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// ─── ACTIVE NAV ────────────────────────────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => sectionObserver.observe(s));
+
+// ─── WIZARD ────────────────────────────────────────
+const answers = {};
+function selectOption(el, step, value) {
+  el.closest('.wizard-options').querySelectorAll('.wizard-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[step] = value;
+}
+
+function nextStep(n) {
+  document.getElementById(`step-${n-1}`).style.display = 'none';
+  document.getElementById(`step-${n}`).style.display = 'block';
+  document.getElementById(`dot-${n-1}`).className = 'wizard-step-dot done';
+  document.getElementById(`dot-${n}`).className = 'wizard-step-dot active';
+  if(n>1) document.getElementById(`line-${n-1}`).classList.add('done');
+}
+function prevStep(n) {
+  document.getElementById(`step-${n+1}`).style.display = 'none';
+  document.getElementById(`step-${n}`).style.display = 'block';
+  document.getElementById(`dot-${n+1}`).className = 'wizard-step-dot';
+  document.getElementById(`dot-${n}`).className = 'wizard-step-dot active';
+  document.getElementById(`line-${n}`).classList.remove('done');
+}
+
+const recommendations = {
+  getRecommendation(a) {
+    const { 1: scale, 2: type, 3: team, 4: priority } = a;
+    if (priority === 'performance' || type === 'ecommerce') {
+      return {
+        name: '🔥 Svelte + SvelteKit',
+        reason: 'Based on your performance-first priority, Svelte is the clear winner. Its compile-time approach generates no runtime overhead, resulting in bundles 60–70% smaller than React or Vue. SvelteKit 2.0 provides excellent SSR for e-commerce use cases. Caveat: plan your hiring strategy carefully given the limited talent pool.',
+        factors: ['⚡ Smallest Bundle (1.6KB)', '🏆 Fastest Runtime', '✅ SvelteKit SSR', '⚠️ Limited Talent Pool']
+      };
+    }
+    if (scale === 'enterprise' || type === 'microfrontend') {
+      if (priority === 'ecosystem' || team === 'react-existing') {
+        return {
+          name: '⚛️ React 19 + Next.js',
+          reason: 'For enterprise scale with micro-frontend requirements, React + Next.js is the definitive choice. It offers unparalleled ecosystem breadth, Module Federation support for micro-frontends, and 110K+ available developers on LinkedIn. 68% of enterprises already use React — your team, your vendors, and your future hires will be aligned.',
+          factors: ['🏢 Enterprise Ready', '🧩 Micro-Frontend (Module Federation)', '👥 110K+ LinkedIn Jobs', '📦 78% of React apps use Next.js']
+        };
+      }
+      return {
+        name: '🅰️ Angular 19',
+        reason: 'For large enterprise teams needing a fully opinionated framework, Angular provides unmatched structure. Its TypeScript-first design, built-in dependency injection, and strict architectural conventions make it ideal for 50+ dev organizations where consistency and governance matter more than flexibility.',
+        factors: ['📐 Fully Opinionated', '💎 TypeScript-First', '🏛️ Large Team Governance', '🔒 Strict Architecture']
+      };
+    }
+    if (scale === 'startup' || team === 'beginner') {
+      return {
+        name: '💚 Vue.js 3 + Nuxt',
+        reason: 'For a startup or junior team, Vue.js offers the fastest path to a working product. It has the gentlest learning curve among all major frameworks — juniors ramp up in days, not weeks. Vue\'s progressive adoption model means you can start simple and grow into complexity. Nuxt provides SSR and excellent performance out of the box.',
+        factors: ['🌱 Gentlest Learning Curve', '🚀 Fastest Startup Delivery', '📈 45% Enterprise Growth YoY', '✅ Nuxt SSR / SSG']
+      };
+    }
+    if (priority === 'hiring' || scale === 'midsize') {
+      return {
+        name: '⚛️ React 19 + Next.js',
+        reason: 'When hiring availability is a top concern, React is the only rational choice. With 52% of frontend job listings on LinkedIn referencing React, and over 110,000 active positions, you will have the widest candidate pool. Mid-size teams with mixed experience also benefit from React\'s massive community resources, tutorials, and component libraries.',
+        factors: ['👥 52% of Frontend Job Listings', '🌐 Largest Community', '📚 Richest Learning Resources', '🔧 Zustand / TanStack Query']
+      };
+    }
+    return {
+      name: '⚛️ React 19 + Next.js',
+      reason: 'Given your profile, React with Next.js remains the safest, most balanced recommendation. It offers the best ecosystem, the largest talent pool, excellent developer experience with modern tooling, and proven scalability. Next.js App Router provides server components and streaming for optimal performance. This is the default choice for most production applications in 2025–2026.',
+      factors: ['✅ Best All-Round Choice', '🔌 Largest Ecosystem', '📈 44.7% Market Share', '🛡️ Meta Long-Term Backing']
+    };
+  }
+};
+
+function showResult() {
+  document.getElementById('step-4').style.display = 'none';
+  document.getElementById('dot-4').className = 'wizard-step-dot done';
+  document.getElementById('line-3').classList.add('done');
+
+  const rec = recommendations.getRecommendation(answers);
+  document.getElementById('result-fw-name').textContent = rec.name;
+  document.getElementById('result-reason').textContent = rec.reason;
+
+  const factorsEl = document.getElementById('result-factors');
+  factorsEl.innerHTML = '';
+  rec.factors.forEach((f, i) => {
+    const cls = f.includes('⚠️') || f.includes('Limited') ? 'warning' : i % 3 === 0 ? 'positive' : '';
+    factorsEl.innerHTML += `<span class="result-factor ${cls}">${f}</span>`;
+  });
+
+  document.getElementById('result-card').classList.add('show');
+}
+
+function resetWizard() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  document.getElementById('result-card').classList.remove('show');
+  for (let i = 1; i <= 4; i++) {
+    const step = document.getElementById(`step-${i}`);
+    if (step) { step.style.display = i === 1 ? 'block' : 'none'; }
+    const dot = document.getElementById(`dot-${i}`);
+    if (dot) dot.className = 'wizard-step-dot' + (i === 1 ? ' active' : '');
+    if (i < 4) {
+      const line = document.getElementById(`line-${i}`);
+      if (line) line.classList.remove('done');
+    }
+  }
+  document.querySelectorAll('.wizard-option').forEach(o => o.classList.remove('selected'));
+}
+
+// ─── STAKEHOLDER TABS ──────────────────────────────
+function showStakeholder(id) {
+  document.querySelectorAll('.stakeholder-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.stakeholder-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`st-${id}`).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── CLOSE MOBILE MENU ON OUTSIDE CLICK ────────────
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('mobileMenu');
+  const ham = document.querySelector('.hamburger');
+  if (!menu.contains(e.target) && !ham.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>
